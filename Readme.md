@@ -1,5 +1,5 @@
 **What it does:**
-Send digits to a server and write them on a file using java Socket server and Guava event bus
+Send digits to a server and writes them in a file. It uses java SocketServer and Guava EventBus
 
 **Client side:**
 - Class _ClientRunner_ makes sure there’s always 5 active connections sending data to the server, if one of them gets disconnected it gets replaced by a new one.
