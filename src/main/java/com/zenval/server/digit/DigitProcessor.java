@@ -15,22 +15,21 @@ import org.slf4j.LoggerFactory;
 public class DigitProcessor {
     private static final Logger logger = LoggerFactory.getLogger(DigitProcessor.class);
 
-    private EventBus eventbus;
+    private DigitWriterAggregator aggregator;
     private DigitUniqueControl digitUniqueControl;
 
-    public DigitProcessor(EventBus eventbus, DigitUniqueControl digitUniqueControl){
-        this.eventbus = eventbus;
+    public DigitProcessor(DigitWriterAggregator aggregator, DigitUniqueControl digitUniqueControl){
+        this.aggregator = aggregator;
         this.digitUniqueControl = digitUniqueControl;
     }
 
     boolean processAndKeepRunning(String input) {
         if (Application.TERMINATE_COMMAND.equals(input)) {
             logger.info("{} received a Terminate Signal by SOCKET!!", this.toString());
-            eventbus.post(new TerminateSignal());
 
         } else if (NumberUtils.isDigits(input)){
             if (digitUniqueControl.isUnique(input)) {
-                eventbus.post(input);
+                aggregator.offer(input);
             }
 
         } else {

@@ -4,10 +4,10 @@ import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import com.zenval.server.digit.DigitEventBusConsumer;
 import com.zenval.server.digit.DigitProcessor;
 import com.zenval.server.digit.DigitSocketReader;
 import com.zenval.server.digit.DigitUniqueControl;
+import com.zenval.server.digit.DigitWriterAggregator;
 import com.zenval.server.helper.DisconnectCallback;
 import com.zenval.server.helper.TerminateSignal;
 import com.zenval.server.stats.StatsReporter;
@@ -48,8 +48,6 @@ public class ServerManager implements Runnable {
         setup();
     }
 
-
-
     @Override
     public void run() {
 
@@ -76,15 +74,8 @@ public class ServerManager implements Runnable {
 
         this.disconnectCallback = this::removeSocketHandler;
 
-        DigitEventBusConsumer digitEventBusConsumer = new DigitEventBusConsumer();
-
-        //guava event bus to decouple the socket reads from the file writes and be used as a channel of communication between threads.
-        EventBus eventBus = new AsyncEventBus(Executors.newFixedThreadPool(10));
-        eventBus.register(digitEventBusConsumer);
-        eventBus.register(this);
-
         DigitUniqueControl digitUniqueControl = new DigitUniqueControl();
-        this.digitProcessor = new DigitProcessor(eventBus, digitUniqueControl);
+        this.digitProcessor = new DigitProcessor(new DigitWriterAggregator(), digitUniqueControl);
 
         this.statsReporter = new StatsReporter(digitUniqueControl, TimeUnit.SECONDS.toMillis(10));
         this.statsReporter.start();
