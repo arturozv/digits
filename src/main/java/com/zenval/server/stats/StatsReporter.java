@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by arturo on 20/05/17.
@@ -18,14 +19,12 @@ public class StatsReporter {
 
     private Timer timer;
     private DigitUniqueControl digitUniqueControl;
-    private long reportPeriod;
 
     private long unique = 0;
     private long duplicates = 0;
 
-    public StatsReporter(DigitUniqueControl digitUniqueControl, long reportPeriod) {
+    public StatsReporter(DigitUniqueControl digitUniqueControl) {
         this.digitUniqueControl = digitUniqueControl;
-        this.reportPeriod = reportPeriod;
     }
 
     String reportStats() {
@@ -50,7 +49,7 @@ public class StatsReporter {
             public void run() {
                 logger.info(reportStats());
             }
-        }, 0, reportPeriod);
+        }, 0,  TimeUnit.SECONDS.toMillis(1));
     }
 
     public void stop() {

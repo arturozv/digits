@@ -77,7 +77,7 @@ public class ServerManager implements Runnable {
         DigitUniqueControl digitUniqueControl = new DigitUniqueControl();
         this.digitProcessor = new DigitProcessor(new DigitWriterAggregator(), digitUniqueControl);
 
-        this.statsReporter = new StatsReporter(digitUniqueControl, TimeUnit.SECONDS.toMillis(10));
+        this.statsReporter = new StatsReporter(digitUniqueControl);
         this.statsReporter.start();
     }
 
