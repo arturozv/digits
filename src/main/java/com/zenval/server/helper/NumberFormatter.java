@@ -1,4 +1,4 @@
-package com.zenval.server.stats;
+package com.zenval.server.helper;
 
 import java.text.DecimalFormat;
 

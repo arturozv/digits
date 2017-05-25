@@ -2,8 +2,7 @@ package com.zenval.server;
 
 import com.zenval.server.digit.DigitProcessor;
 import com.zenval.server.digit.DigitUniqueControl;
-import com.zenval.server.digit.DigitWriterAggregator;
-import com.zenval.server.stats.StatsReporter;
+import com.zenval.server.file.DigitFileWriter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,18 +35,19 @@ public class Server implements Runnable {
     public void run() {
         ExecutorService executorService = Executors.newFixedThreadPool(maxConnections);
         DigitUniqueControl digitUniqueControl = new DigitUniqueControl();
-        DigitProcessor digitProcessor = new DigitProcessor(new DigitWriterAggregator(), digitUniqueControl);
-        StatsReporter statsReporter = new StatsReporter(digitUniqueControl);
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-            while (!executorService.isShutdown() && runningTasks.get() < maxConnections) {
+            DigitProcessor digitProcessor = new DigitProcessor(new DigitFileWriter(), digitUniqueControl);
 
+            while (!executorService.isShutdown() && runningTasks.get() < maxConnections) {
+                logger.info("Attempting to get socket {}", runningTasks.get());
                 Socket socket = serverSocket.accept();
+
                 runningTasks.incrementAndGet();
 
                 executorService.submit(() -> {
-                    logger.info("Server started {}", socket);
+                    logger.info("Connection started {}", socket);
                     try (
                             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
                     ) {
@@ -55,6 +55,7 @@ public class Server implements Runnable {
                         boolean shouldStop = false;
 
                         while (!executorService.isShutdown() && !shouldStop && (inputLine = in.readLine()) != null) {
+                            logger.info("Read digit {}", inputLine);
                             DigitProcessor.DIGIT_RESULT result = digitProcessor.process(inputLine);
 
                             switch (result) {
@@ -78,8 +79,7 @@ public class Server implements Runnable {
 
         } catch (IOException e) {
             logger.error("Error creating the Server", e);
-        } finally {
-            statsReporter.stop();
+            System.exit(1);
         }
     }
 }

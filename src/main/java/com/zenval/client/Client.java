@@ -33,9 +33,17 @@ public class Client implements Runnable {
 
             while (!out.checkError()) {
                 out.println(RandomStringUtils.randomNumeric(9));
+                Thread.sleep(100);
             }
 
         } catch (IOException e) {
+            e.printStackTrace();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+        } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             clientEventCallback.onDisconnect();

@@ -2,7 +2,7 @@ package com.zenval.server.digit
 
 import com.google.common.eventbus.EventBus
 import com.zenval.Application
-import com.zenval.server.helper.TerminateSignal
+
 import spock.lang.Specification
 
 /**
@@ -54,17 +54,5 @@ class DigitProcessorTest extends Specification {
         result == false
         0 * uniqueDigitControl.isUnique(_ as String)
         0 * eventBus.post(_ as Object)
-    }
-
-    def "digitProcessor - process Terminate"() {
-        given:
-        digitProcessor = new DigitProcessor(eventBus, uniqueDigitControl)
-
-        when: "invalid input"
-        def result = digitProcessor.process(Application.TERMINATE_COMMAND)
-        then: "don't keep alive, no check unique or send to bus"
-        result == true
-        0 * uniqueDigitControl.isUnique(_ as String)
-        1 * eventBus.post(_ as TerminateSignal)
     }
 }
