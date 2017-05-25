@@ -18,18 +18,20 @@ public class DigitProcessor {
 
     public DIGIT_RESULT process(String input) throws IOException {
         DIGIT_RESULT result;
+
         if (Application.TERMINATE_COMMAND.equals(input)) {
             result = DIGIT_RESULT.TERMINATE;
 
-        } else if (NumberUtils.isDigits(input)) {
-            if (digitUniqueControl.isUnique(input)) {
-                result = DIGIT_RESULT.OK;
-            } else {
-                result = DIGIT_RESULT.DUPLICATED;
-            }
+        } else if (!NumberUtils.isDigits(input)) {
+            result = DIGIT_RESULT.WRONG_FORMAT;
+
+        } else if (!digitUniqueControl.isUnique(input)) {
+            result = DIGIT_RESULT.DUPLICATED;
+
         } else {
-            return DIGIT_RESULT.WRONG_FORMAT;
+            result = DIGIT_RESULT.OK;
         }
+
         return result;
     }
 
