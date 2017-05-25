@@ -1,8 +1,12 @@
 package com.zenval.client;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,25 +33,33 @@ public class ClientRunner implements Runnable {
 
     @Override
     public void run() {
-        ClientEventCallback clientEventCallback = clientEventCallback();
         while (currentConnections.get() < maxConcurrentConnections) {
-            executorService.submit(new Client(host, port, clientEventCallback));
+            executorService.submit(() -> {
+                try (
+                        Socket socket = new Socket(host, port);
+                        PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
+                ) {
+
+                    currentConnections.incrementAndGet();
+
+                    while (!out.checkError()) {
+                        long t = System.currentTimeMillis();
+                        String digit = RandomStringUtils.randomNumeric(9);
+                        out.println(digit);
+
+
+                        long time = (System.currentTimeMillis() - t);
+                        if (time > 100) {
+                            logger.warn("Sent digit {} in {}ms", digit, time);
+                        }
+                    }
+
+                } catch (IOException e) {
+                    logger.error("Error sending digit: " + e.getMessage());
+                } finally {
+                    currentConnections.getAndDecrement();
+                }
+            });
         }
-    }
-
-    private ClientEventCallback clientEventCallback() {
-        return new ClientEventCallback() {
-            @Override
-            public void onConnectionSuccess() {
-                int current = currentConnections.incrementAndGet();
-                logger.debug("Client connected!", current);
-            }
-
-            @Override
-            public void onDisconnect() {
-                int current = currentConnections.getAndDecrement();
-                logger.debug("Client disconnected!", current);
-            }
-        };
     }
 }
