@@ -105,7 +105,6 @@ public class Server implements Runnable {
         }
         logger.info("All workers have been terminated");
         statsReporter.stop();
-        server.stop();
     }
 
     void removeSocketHandler(DigitSocketReader digitSocketReader) {
