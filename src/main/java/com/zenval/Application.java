@@ -1,7 +1,7 @@
 package com.zenval;
 
 import com.zenval.client.ClientRunner;
-import com.zenval.server.ServerManager;
+import com.zenval.server.Server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class Application {
     public static void main(String[] args) throws IOException {
         logger.info("Starting application...");
 
-        new Thread(new ServerManager(PORT, CONCURRENT_CONNECTIONS)).start();
+        new Thread(new Server(PORT, CONCURRENT_CONNECTIONS)).start();
         new Thread(new ClientRunner(HOST, PORT, CONCURRENT_CONNECTIONS)).start();
 
         logger.info("Application started!");
