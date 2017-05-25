@@ -50,7 +50,7 @@ public class ClientRunner implements Runnable {
 
                         long time = (System.currentTimeMillis() - t);
                         if (time > 100) {
-                            logger.warn("Sent digit {} in {}ms", digit, time);
+                            logger.warn("digit {} took {}ms to be send", digit, time);
                         }
                     }
 
