@@ -24,7 +24,7 @@ class DigitProcessorTest extends Specification {
         def input = new String("123")
 
         when: "valid input"
-        def result = digitProcessor.processAndKeepRunning(input)
+        def result = digitProcessor.process(input)
         then: "keep alive, check unique, send to bus"
         result == true
         1 * uniqueDigitControl.isUnique(_ as String)
@@ -37,7 +37,7 @@ class DigitProcessorTest extends Specification {
         def input = new String("00123")
 
         when: "valid input"
-        def result = digitProcessor.processAndKeepRunning(input)
+        def result = digitProcessor.process(input)
         then: "keep alive, check unique, send to bus"
         result == true
         1 * uniqueDigitControl.isUnique(_ as String)
@@ -49,7 +49,7 @@ class DigitProcessorTest extends Specification {
         digitProcessor = new DigitProcessor(eventBus, uniqueDigitControl)
 
         when: "invalid input"
-        def result = digitProcessor.processAndKeepRunning("123ABC")
+        def result = digitProcessor.process("123ABC")
         then: "don't keep alive, no check unique or send to bus"
         result == false
         0 * uniqueDigitControl.isUnique(_ as String)
@@ -61,7 +61,7 @@ class DigitProcessorTest extends Specification {
         digitProcessor = new DigitProcessor(eventBus, uniqueDigitControl)
 
         when: "invalid input"
-        def result = digitProcessor.processAndKeepRunning(Application.TERMINATE_COMMAND)
+        def result = digitProcessor.process(Application.TERMINATE_COMMAND)
         then: "don't keep alive, no check unique or send to bus"
         result == true
         0 * uniqueDigitControl.isUnique(_ as String)

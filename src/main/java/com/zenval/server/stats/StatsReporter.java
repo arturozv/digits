@@ -25,6 +25,13 @@ public class StatsReporter {
 
     public StatsReporter(DigitUniqueControl digitUniqueControl) {
         this.digitUniqueControl = digitUniqueControl;
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                logger.info(reportStats());
+            }
+        }, 0, TimeUnit.SECONDS.toMillis(1));
     }
 
     String reportStats() {
@@ -40,16 +47,6 @@ public class StatsReporter {
         duplicates = duplicatedSize;
 
         return result;
-    }
-
-    public void start() {
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                logger.info(reportStats());
-            }
-        }, 0,  TimeUnit.SECONDS.toMillis(1));
     }
 
     public void stop() {
