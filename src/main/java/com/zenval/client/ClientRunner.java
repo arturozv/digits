@@ -32,10 +32,8 @@ public class ClientRunner implements Runnable {
     @Override
     public void run() {
         ClientEventCallback clientEventCallback = clientEventCallback();
-        while (!terminateSignalSent.get()) {
-            if (currentConnections.get() < maxConcurrentConnections) {
-                executorService.submit(new Client(host, port, clientEventCallback));
-            }
+        while (!terminateSignalSent.get() && currentConnections.get() < maxConcurrentConnections) {
+            executorService.submit(new Client(host, port, clientEventCallback));
         }
     }
 
