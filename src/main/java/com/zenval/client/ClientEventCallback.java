@@ -6,5 +6,4 @@ package com.zenval.client;
 public interface ClientEventCallback {
     void onConnectionSuccess();
     void onDisconnect();
-    void onTerminate();
 }

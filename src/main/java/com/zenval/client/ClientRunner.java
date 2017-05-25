@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -19,7 +18,6 @@ public class ClientRunner implements Runnable {
     private ExecutorService executorService;
     private final int maxConcurrentConnections;
     private AtomicInteger currentConnections;
-    private AtomicBoolean terminateSignalSent = new AtomicBoolean(false);
 
     public ClientRunner(String host, int port, int maxConcurrentConnections) {
         this.executorService = Executors.newFixedThreadPool(maxConcurrentConnections);
@@ -32,7 +30,7 @@ public class ClientRunner implements Runnable {
     @Override
     public void run() {
         ClientEventCallback clientEventCallback = clientEventCallback();
-        while (!terminateSignalSent.get() && currentConnections.get() < maxConcurrentConnections) {
+        while (currentConnections.get() < maxConcurrentConnections) {
             executorService.submit(new Client(host, port, clientEventCallback));
         }
     }
@@ -49,11 +47,6 @@ public class ClientRunner implements Runnable {
             public void onDisconnect() {
                 int current = currentConnections.getAndDecrement();
                 logger.debug("Client disconnected!", current);
-            }
-
-            @Override
-            public void onTerminate() {
-                terminateSignalSent.set(true);
             }
         };
     }
