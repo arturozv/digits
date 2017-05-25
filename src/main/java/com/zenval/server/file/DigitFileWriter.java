@@ -25,9 +25,8 @@ public class DigitFileWriter {
     private static final Logger logger = LoggerFactory.getLogger(DigitFileWriter.class);
     private FileChannel fileChannel;
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    final Object sync = new Object();
 
-    private BlockingQueue<String> queue = new ArrayBlockingQueue<>(100_000_000);
+    private BlockingQueue<String> queue = new ArrayBlockingQueue<>(10_000_000);
 
     public DigitFileWriter() {
         try {
@@ -41,22 +40,22 @@ public class DigitFileWriter {
         }
 
         executorService.scheduleAtFixedRate(() -> {
-            synchronized (sync) {
-                if (!queue.isEmpty()) {
-                    Set<String> toProcess = new HashSet<>();
-                    int toDrain = queue.size();
-                    queue.drainTo(toProcess, toDrain);
+            logger.info("async writing started");
+            int toDrain = queue.size();
+            logger.info("toDrain {} digits", toDrain);
+            if (toDrain > 0) {
+                Set<String> toProcess = new HashSet<>();
+                queue.drainTo(toProcess, toDrain);
 
-                    if (toProcess.size() > 0) {
-                        logger.info("writing {} digits", toProcess.size());
-                        write(String.join(System.lineSeparator(), toProcess));
-                    }
+                if (toProcess.size() > 0) {
+                    logger.info("writing {} digits", toProcess.size());
+                    write(String.join(System.lineSeparator(), toProcess));
                 }
             }
-        }, 0, 1, TimeUnit.MILLISECONDS);
+        }, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
-    public synchronized void writeAsync(final String content) {
+    public void writeAsync(final String content) {
         queue.offer(content);
     }
 

@@ -1,7 +1,6 @@
 package com.zenval.server.digit;
 
 import com.zenval.Application;
-import com.zenval.server.file.DigitFileWriter;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -11,11 +10,9 @@ import java.io.IOException;
  * Created by arturo on 20/05/17.
  */
 public class DigitProcessor {
-    private DigitFileWriter digitFileWriter;
     private DigitUniqueControl digitUniqueControl;
 
-    public DigitProcessor(DigitFileWriter digitFileWriter, DigitUniqueControl digitUniqueControl) {
-        this.digitFileWriter = digitFileWriter;
+    public DigitProcessor(DigitUniqueControl digitUniqueControl) {
         this.digitUniqueControl = digitUniqueControl;
     }
 
@@ -26,7 +23,6 @@ public class DigitProcessor {
 
         } else if (NumberUtils.isDigits(input)) {
             if (digitUniqueControl.isUnique(input)) {
-                digitFileWriter.writeAsync(input);
                 result = DIGIT_RESULT.OK;
             } else {
                 result = DIGIT_RESULT.DUPLICATED;

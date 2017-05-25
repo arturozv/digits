@@ -38,7 +38,8 @@ public class Server implements Runnable {
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-            DigitProcessor digitProcessor = new DigitProcessor(new DigitFileWriter(), digitUniqueControl);
+            DigitProcessor digitProcessor = new DigitProcessor(digitUniqueControl);
+            DigitFileWriter digitFileWriter = new DigitFileWriter();
 
             while (!executorService.isShutdown() && runningTasks.get() < maxConnections) {
                 logger.info("Attempting to get socket {}", runningTasks.get());
@@ -51,25 +52,38 @@ public class Server implements Runnable {
                     try (
                             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
                     ) {
-                        String inputLine;
+                        String digit;
                         boolean shouldStop = false;
 
-                        while (!executorService.isShutdown() && !shouldStop && (inputLine = in.readLine()) != null) {
-                            logger.info("Read digit {}", inputLine);
-                            DigitProcessor.DIGIT_RESULT result = digitProcessor.process(inputLine);
+                        while (!executorService.isShutdown() && !shouldStop && (digit = in.readLine()) != null) {
+                            long t = System.currentTimeMillis();
+                            DigitProcessor.DIGIT_RESULT result = digitProcessor.process(digit);
 
                             switch (result) {
+                                case OK:
+                                    digitFileWriter.writeAsync(digit);
+                                    break;
+
                                 case TERMINATE:
                                     executorService.shutdown();
                                     break;
+
                                 case WRONG_FORMAT:
                                     shouldStop = true;
                                     break;
+
+                                case DUPLICATED:
                                 default:
                                     break;
                             }
+
+                            long time = (System.currentTimeMillis() - t);
+                            if(time > 100) {
+                                logger.info("Processed digit {} -> {} in {}ms", digit, result, time);
+                            }
                         }
-                        runningTasks.decrementAndGet();
+
+                        logger.info("decrementAndGet {}", runningTasks.decrementAndGet());
 
                     } catch (IOException e) {
                         logger.error("Error reading from socket", e);
