@@ -1,7 +1,5 @@
 package com.zenval.client;
 
-import com.zenval.Application;
-
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.IOException;
@@ -13,44 +11,35 @@ import java.net.Socket;
  */
 public class Client implements Runnable {
 
-    private Socket socket;
-    private PrintWriter out;
+    private String host;
+    private int port;
+
     private ClientEventCallback clientEventCallback;
 
     public Client(String host, int port, ClientEventCallback clientEventCallback) {
         this.clientEventCallback = clientEventCallback;
-
-        try {
-            socket = new Socket(host, port);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            clientEventCallback.onConnectionSuccess();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            clientEventCallback.onDisconnect();
-        }
+        this.host = host;
+        this.port = port;
     }
 
     @Override
     public void run() {
-        while (!out.checkError()) {
-            String digits = RandomStringUtils.randomNumeric(9);
+        try (
+                Socket socket = new Socket(host, port);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
+        ) {
 
-            //randomly send a terminate command
-            if (Long.parseLong(digits) % 10000000 == 0) {
-                out.println(Application.TERMINATE_COMMAND);
-                clientEventCallback.onTerminate();
-                break;
+            clientEventCallback.onConnectionSuccess();
 
-            //randomly send a bad digit
-            } else if (Long.parseLong(digits) % 1000000 == 0) {
-                out.println(digits+"a"); //force error
-
-            //send good digit
-            } else {
-                out.println(digits);
+            while (!out.checkError()) {
+                out.println(RandomStringUtils.randomNumeric(9));
+                out.flush();
             }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            clientEventCallback.onDisconnect();
         }
-        clientEventCallback.onDisconnect();
     }
 }
