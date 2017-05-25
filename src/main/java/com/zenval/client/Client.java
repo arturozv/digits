@@ -33,7 +33,6 @@ public class Client implements Runnable {
 
             while (!out.checkError()) {
                 out.println(RandomStringUtils.randomNumeric(9));
-                out.flush();
             }
 
         } catch (IOException e) {
