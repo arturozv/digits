@@ -15,7 +15,7 @@ public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     public final static String TERMINATE_COMMAND = "terminate";
-    public final static int CONCURRENT_CONNECTIONS = 1;
+    public final static int CONCURRENT_CONNECTIONS = 5;
 
     public final static String HOST = "127.0.0.1";
     public final static int PORT = 4000;

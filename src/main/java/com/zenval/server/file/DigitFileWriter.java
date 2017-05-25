@@ -39,10 +39,9 @@ public class DigitFileWriter {
             System.exit(1);
         }
 
+        //every X seconds drain the queue and write the file
         executorService.scheduleAtFixedRate(() -> {
-            logger.info("async writing started");
             int toDrain = queue.size();
-            logger.info("toDrain {} digits", toDrain);
             if (toDrain > 0) {
                 Set<String> toProcess = new HashSet<>();
                 queue.drainTo(toProcess, toDrain);
@@ -52,7 +51,7 @@ public class DigitFileWriter {
                     write(String.join(System.lineSeparator(), toProcess));
                 }
             }
-        }, 1000, 1000, TimeUnit.MILLISECONDS);
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
     public void writeAsync(final String content) {
@@ -64,6 +63,7 @@ public class DigitFileWriter {
             fileChannel.write(ByteBuffer.wrap(content.getBytes()));
         } catch (IOException e) {
             logger.error("Error writing file", e);
+            System.exit(1);
         }
     }
 }

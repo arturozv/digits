@@ -79,7 +79,7 @@ public class Server implements Runnable {
 
                             long time = (System.currentTimeMillis() - t);
                             if(time > 100) {
-                                logger.info("Processed digit {} -> {} in {}ms", digit, result, time);
+                                logger.warn("Digit {} -> {} took {}ms to read and process", digit, result, time);
                             }
                         }
 
