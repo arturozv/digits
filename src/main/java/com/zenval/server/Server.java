@@ -43,39 +43,37 @@ public class Server implements Runnable {
 
             while (!executorService.isShutdown() && runningTasks.get() < maxConnections) {
 
-                executorService.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        logger.info("" + serverSocket.isBound());
-                        try (
-                                Socket socket = serverSocket.accept();
-                                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
-                        ) {
-                            String inputLine;
-                            boolean shouldStop = false;
+                Socket socket = serverSocket.accept();
+                runningTasks.incrementAndGet();
 
-                            while (!executorService.isShutdown() && !shouldStop && (inputLine = in.readLine()) != null) {
-                                DigitProcessor.DIGIT_RESULT result = digitProcessor.process(inputLine);
+                executorService.submit(() -> {
+                    logger.info("Server started {}", socket);
+                    try (
+                            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+                    ) {
+                        String inputLine;
+                        boolean shouldStop = false;
 
-                                switch (result) {
-                                    case TERMINATE:
-                                        executorService.shutdown();
-                                        break;
-                                    case WRONG_FORMAT:
-                                        shouldStop = true;
-                                        break;
-                                    default:
-                                        break;
-                                }
+                        while (!executorService.isShutdown() && !shouldStop && (inputLine = in.readLine()) != null) {
+                            DigitProcessor.DIGIT_RESULT result = digitProcessor.process(inputLine);
+
+                            switch (result) {
+                                case TERMINATE:
+                                    executorService.shutdown();
+                                    break;
+                                case WRONG_FORMAT:
+                                    shouldStop = true;
+                                    break;
+                                default:
+                                    break;
                             }
-                            runningTasks.decrementAndGet();
-
-                        } catch (IOException e) {
-                            logger.error("Error reading from socket", e);
                         }
+                        runningTasks.decrementAndGet();
+
+                    } catch (IOException e) {
+                        logger.error("Error reading from socket", e);
                     }
                 });
-                runningTasks.incrementAndGet();
             }
 
         } catch (IOException e) {
