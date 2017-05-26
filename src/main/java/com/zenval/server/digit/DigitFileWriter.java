@@ -26,7 +26,7 @@ public class DigitFileWriter {
     private FileChannel fileChannel;
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-    private BlockingQueue<String> queue = new ArrayBlockingQueue<>(10_000_000);
+    private BlockingQueue<String> queue = new ArrayBlockingQueue<>(2_000_000);
 
     public DigitFileWriter() {
         try {
