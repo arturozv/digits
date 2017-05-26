@@ -33,8 +33,11 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
+
         while (currentConnections.get() < maxConcurrentConnections) {
+
             executorService.submit(() -> {
+
                 try (
                         Socket socket = new Socket(host, port);
                         PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
@@ -43,15 +46,8 @@ public class Client implements Runnable {
                     currentConnections.incrementAndGet();
 
                     while (!out.checkError()) {
-                        long t = System.currentTimeMillis();
                         String digit = RandomStringUtils.randomNumeric(9);
                         out.println(digit);
-
-
-                        long time = (System.currentTimeMillis() - t);
-                        if (time > 100) {
-                            logger.debug("digit {} took {}ms to be send", digit, time);
-                        }
                     }
 
                 } catch (IOException e) {
@@ -59,6 +55,7 @@ public class Client implements Runnable {
                 } finally {
                     currentConnections.getAndDecrement();
                 }
+
             });
         }
     }
