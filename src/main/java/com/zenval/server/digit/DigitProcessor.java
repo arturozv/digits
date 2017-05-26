@@ -4,8 +4,6 @@ import com.zenval.Application;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import java.io.IOException;
-
 /**
  * Created by arturo on 20/05/17.
  */
@@ -16,7 +14,7 @@ public class DigitProcessor {
         this.digitUniqueControl = digitUniqueControl;
     }
 
-    public DIGIT_RESULT process(String input) throws IOException {
+    public DIGIT_RESULT process(String input) {
         DIGIT_RESULT result;
 
         if (Application.TERMINATE_COMMAND.equals(input)) {

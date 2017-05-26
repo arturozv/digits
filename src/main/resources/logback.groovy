@@ -13,4 +13,4 @@ appender("CONSOLE", ConsoleAppender) {
         pattern = "%date{ISO8601} [%thread] [%p] %c - %m%n"
     }
 }
-root(DEBUG, ["CONSOLE"])
+root(INFO, ["CONSOLE"])

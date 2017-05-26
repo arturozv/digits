@@ -2,7 +2,7 @@ package com.zenval.server;
 
 import com.zenval.server.digit.DigitProcessor;
 import com.zenval.server.digit.DigitUniqueControl;
-import com.zenval.server.file.DigitFileWriter;
+import com.zenval.server.digit.DigitFileWriter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +79,7 @@ public class Server implements Runnable {
 
                             long time = (System.currentTimeMillis() - t);
                             if(time > 100) {
-                                logger.warn("Digit {} -> {} took {}ms to read and process", digit, result, time);
+                                logger.debug("Digit {} -> {} took {}ms to read and process", digit, result, time);
                             }
                         }
 

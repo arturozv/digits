@@ -1,6 +1,6 @@
 package com.zenval;
 
-import com.zenval.client.ClientRunner;
+import com.zenval.client.Client;
 import com.zenval.server.Server;
 
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public class Application {
         logger.info("Starting application...");
 
         new Thread(new Server(PORT, CONCURRENT_CONNECTIONS)).start();
-        new Thread(new ClientRunner(HOST, PORT, CONCURRENT_CONNECTIONS)).start();
+        new Thread(new Client(HOST, PORT, CONCURRENT_CONNECTIONS)).start();
 
         logger.info("Application started!");
     }

@@ -1,4 +1,4 @@
-package com.zenval.server.file;
+package com.zenval.server.digit;
 
 import com.google.common.io.Files;
 

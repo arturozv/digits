@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by arturo on 20/05/17.
  */
-public class ClientRunner implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(ClientRunner.class);
+public class Client implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
     private final String host;
     private final int port;
@@ -23,7 +23,7 @@ public class ClientRunner implements Runnable {
     private final int maxConcurrentConnections;
     private AtomicInteger currentConnections;
 
-    public ClientRunner(String host, int port, int maxConcurrentConnections) {
+    public Client(String host, int port, int maxConcurrentConnections) {
         this.executorService = Executors.newFixedThreadPool(maxConcurrentConnections);
         this.maxConcurrentConnections = maxConcurrentConnections;
         this.currentConnections = new AtomicInteger(0);
@@ -50,7 +50,7 @@ public class ClientRunner implements Runnable {
 
                         long time = (System.currentTimeMillis() - t);
                         if (time > 100) {
-                            logger.warn("digit {} took {}ms to be send", digit, time);
+                            logger.debug("digit {} took {}ms to be send", digit, time);
                         }
                     }
 
