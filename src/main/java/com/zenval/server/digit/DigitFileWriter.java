@@ -47,7 +47,7 @@ public class DigitFileWriter {
                 queue.drainTo(toProcess, toDrain);
 
                 if (toProcess.size() > 0) {
-                    logger.info("writing {} digits", toProcess.size());
+                    logger.debug("writing {} digits", toProcess.size());
                     write(String.join(System.lineSeparator(), toProcess));
                 }
             }

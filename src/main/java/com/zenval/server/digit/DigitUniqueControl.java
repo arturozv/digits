@@ -5,11 +5,13 @@ import com.zenval.server.helper.NumberFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by arturo on 20/05/17.
@@ -21,14 +23,16 @@ public class DigitUniqueControl {
     private volatile long unique = 0;
     private volatile long duplicates = 0;
 
+    private AtomicLong size = new AtomicLong(0);
+
     private Set<Integer> processed;
 
     public DigitUniqueControl() {
-        processed = ConcurrentHashMap.newKeySet();
+        processed = new HashSet<>();
 
         executorService.scheduleAtFixedRate(() -> {
 
-            int processedSize = processed.size();
+            long processedSize = size.get();
 
             logger.info("Received {} unique numbers, {} duplicates. Unique total: {}",
                         NumberFormatter.format(processedSize - unique),
@@ -48,6 +52,7 @@ public class DigitUniqueControl {
             return false;
         }
         processed.add(asInt);
+        size.incrementAndGet();
         return true;
     }
 }
