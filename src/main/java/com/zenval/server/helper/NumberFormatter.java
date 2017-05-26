@@ -11,6 +11,11 @@ public class NumberFormatter {
 
     private static String[] suffix = new String[]{"", "k", "m", "b", "t"};
 
+    /**
+     * formats a number into a human readable one
+     * @param number number to be formatted
+     * @return formatted number
+     */
     public static String format(double number) {
         String r = new DecimalFormat("##0E0").format(number);
         r = r.replaceAll("E[0-9]", suffix[Character.getNumericValue(r.charAt(r.length() - 1)) / 3]);

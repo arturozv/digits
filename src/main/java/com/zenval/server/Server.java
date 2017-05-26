@@ -1,8 +1,8 @@
 package com.zenval.server;
 
+import com.zenval.server.digit.DigitFileWriter;
 import com.zenval.server.digit.DigitProcessor;
 import com.zenval.server.digit.DigitUniqueControl;
-import com.zenval.server.digit.DigitFileWriter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,59 +41,68 @@ public class Server implements Runnable {
             DigitProcessor digitProcessor = new DigitProcessor(digitUniqueControl);
             DigitFileWriter digitFileWriter = new DigitFileWriter();
 
-            while (!executorService.isShutdown() && runningTasks.get() < maxConnections) {
-                logger.info("Attempting to get socket {}", runningTasks.get());
-                Socket socket = serverSocket.accept();
+            //run until one worker receives a termination signal
+            while (!executorService.isShutdown()) {
 
-                runningTasks.incrementAndGet();
+                //spawn workers until desired capacity
+                while (runningTasks.get() < maxConnections) {
 
-                executorService.submit(() -> {
-                    logger.info("Connection started {}", socket);
-                    try (
-                            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
-                    ) {
-                        String digit;
-                        boolean shouldStop = false;
+                    logger.info("Attempting to get socket {}", runningTasks.get());
+                    Socket socket = serverSocket.accept();
 
-                        while (!executorService.isShutdown() && !shouldStop && (digit = in.readLine()) != null) {
-                            long t = System.currentTimeMillis();
-                            DigitProcessor.DIGIT_RESULT result = digitProcessor.process(digit);
+                    runningTasks.incrementAndGet();
 
-                            switch (result) {
-                                case OK:
-                                    digitFileWriter.writeAsync(digit);
-                                    break;
 
-                                case TERMINATE:
-                                    executorService.shutdown();
-                                    break;
+                    executorService.submit(() -> {
+                        logger.info("Connection started {}", socket);
+                        try (
+                                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+                        ) {
+                            String digit;
+                            boolean shouldStop = false;
 
-                                case WRONG_FORMAT:
-                                    shouldStop = true;
-                                    break;
+                            //read from the socket until a termination signal or an invalid digit is received
+                            while (!executorService.isShutdown() && !shouldStop && (digit = in.readLine()) != null) {
 
-                                case DUPLICATED:
-                                default:
-                                    break;
+                                //process the digit
+                                switch (digitProcessor.process(digit)) {
+                                    case OK:
+                                        digitFileWriter.writeAsync(digit);
+                                        break;
+
+                                    case TERMINATE:
+                                        logger.warn("TERMINATION SIGNAL RECEIVED");
+                                        executorService.shutdown();
+                                        digitUniqueControl.stop();
+                                        digitFileWriter.stop();
+                                        break;
+
+                                    case WRONG_FORMAT:
+                                        shouldStop = true;
+                                        break;
+
+                                    default:
+                                        break;
+                                }
                             }
 
-                            long time = (System.currentTimeMillis() - t);
-                            if(time > 100) {
-                                logger.debug("Digit {} -> {} took {}ms to read and process", digit, result, time);
-                            }
+                            runningTasks.decrementAndGet();
+
+                        } catch (IOException e) {
+                            logger.error("Error reading from socket", e);
                         }
-
-                        logger.info("decrementAndGet {}", runningTasks.decrementAndGet());
-
-                    } catch (IOException e) {
-                        logger.error("Error reading from socket", e);
-                    }
-                });
+                    });
+                }
             }
 
         } catch (IOException e) {
             logger.error("Error creating the Server", e);
             System.exit(1);
+        }
+
+        if (executorService.isShutdown()) {
+            logger.info("Server stopped, exiting program!");
+            System.exit(0);
         }
     }
 }

@@ -19,27 +19,31 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by arturo on 20/05/17.
+ * Asynchronous file writer
  */
 public class DigitFileWriter {
     private static final Logger logger = LoggerFactory.getLogger(DigitFileWriter.class);
+    private File file;
     private FileChannel fileChannel;
+    private FileOutputStream fileOutputStream;
     final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     private BlockingQueue<String> queue = new ArrayBlockingQueue<>(2_000_000);
 
     public DigitFileWriter() {
+
+        //initialize the file/stream/channel
         try {
-            File file = new File("digits.log");
+            file = new File("digits.log");
             Files.write(new byte[]{}, file); //clear file
-            FileOutputStream fileOutputStream = new FileOutputStream(file, true);
+            fileOutputStream = new FileOutputStream(file, true);
             fileChannel = fileOutputStream.getChannel();
         } catch (IOException e) {
             logger.error("Error creating opening the file", e);
             System.exit(1);
         }
 
-        //every X seconds drain the queue and write the file
+        //every X seconds drain digits from the queue and writes them in the file
         executorService.scheduleAtFixedRate(() -> {
             int toDrain = queue.size();
             if (toDrain > 0) {
@@ -54,11 +58,15 @@ public class DigitFileWriter {
         }, 1, 1, TimeUnit.SECONDS);
     }
 
+    /**
+     * Add a line to be written asynchronously in the file
+     * @param content
+     */
     public void writeAsync(final String content) {
         queue.offer(content);
     }
 
-    public void write(final String content) {
+    void write(final String content) {
         try {
             fileChannel.write(ByteBuffer.wrap(content.getBytes()));
         } catch (IOException e) {
@@ -66,4 +74,17 @@ public class DigitFileWriter {
             System.exit(1);
         }
     }
+
+    /**
+     * close the file
+     */
+    public void stop(){
+        try {
+            fileOutputStream.close();
+            fileChannel.close();
+        } catch (IOException e) {
+            logger.error("Error closing file", e);
+        }
+    }
+
 }

@@ -25,12 +25,13 @@ public class DigitUniqueControl {
 
     private AtomicLong processedSize = new AtomicLong(0);
 
-
+    //primitive set to optimize memory size
     private IntHashSet processed;
 
     public DigitUniqueControl() {
-        processed = new IntHashSet(536870912, 0.99); //2exp30
+        processed = new IntHashSet();
 
+        //report stats every X seconds
         executorService.scheduleAtFixedRate(() -> {
 
             long processedSize = this.processedSize.get();
@@ -47,6 +48,11 @@ public class DigitUniqueControl {
         }, 1, 10, TimeUnit.SECONDS);
     }
 
+    /**
+     * Check if a digit is unique
+     * @param candidate digit to be checked
+     * @return true if is unique, false if it has been previously processed.
+     */
     public synchronized boolean isUnique(String candidate) {
         int asInt = Integer.parseInt(candidate);
         if (processed.contains(asInt)) {
@@ -56,5 +62,13 @@ public class DigitUniqueControl {
         processed.add(asInt);
         processedSize.incrementAndGet();
         return true;
+    }
+
+    /**
+     * Stops the reporter
+     */
+    public void stop() {
+        logger.info("Reporter stopped");
+        executorService.shutdown();
     }
 }

@@ -5,7 +5,7 @@ import com.zenval.Application;
 import org.apache.commons.lang3.math.NumberUtils;
 
 /**
- * Created by arturo on 20/05/17.
+ * Process the digit in the server prior to write it into a file.
  */
 public class DigitProcessor {
     private DigitUniqueControl digitUniqueControl;
