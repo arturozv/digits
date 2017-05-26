@@ -1,13 +1,12 @@
 package com.zenval.server.digit;
 
-import com.google.common.collect.Sets;
-
 import com.zenval.server.helper.NumberFormatter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,10 +21,10 @@ public class DigitUniqueControl {
     private volatile long unique = 0;
     private volatile long duplicates = 0;
 
-    private Set<String> processed;
+    private Set<Integer> processed;
 
     public DigitUniqueControl() {
-        processed = Sets.newConcurrentHashSet();
+        processed = ConcurrentHashMap.newKeySet();
 
         executorService.scheduleAtFixedRate(() -> {
 
@@ -43,11 +42,12 @@ public class DigitUniqueControl {
     }
 
     public synchronized boolean isUnique(String candidate) {
-        if (processed.contains(candidate)) {
+        Integer asInt = Integer.parseInt(candidate);
+        if (processed.contains(asInt)) {
             duplicates++;
             return false;
         }
-        processed.add(candidate);
+        processed.add(asInt);
         return true;
     }
 }
