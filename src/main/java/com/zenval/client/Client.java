@@ -51,7 +51,7 @@ public class Client implements Runnable {
                     }
 
                 } catch (IOException e) {
-                    logger.error("Error sending digit: " + e.getMessage());
+                    logger.debug("Error sending digit: " + e.getMessage());
                 } finally {
                     currentConnections.getAndDecrement();
                 }

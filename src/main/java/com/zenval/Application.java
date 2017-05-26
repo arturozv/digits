@@ -21,11 +21,8 @@ public class Application {
     public final static int PORT = 4000;
 
     public static void main(String[] args) throws IOException {
-        logger.info("Starting application...");
-
         new Thread(new Server(PORT, CONCURRENT_CONNECTIONS)).start();
         new Thread(new Client(HOST, PORT, CONCURRENT_CONNECTIONS)).start();
-
         logger.info("Application started!");
     }
 }
